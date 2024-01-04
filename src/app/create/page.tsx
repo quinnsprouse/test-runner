@@ -36,7 +36,7 @@ interface AddTestFormProps {
   testData?: testData;
 }
 
-export default function AddTestForm(props: AddTestFormProps) {
+const AddTestForm: React.FC<AddTestFormProps> = (props) => {
   const user = useUser().user;
   const router = useRouter();
   const addTestMutation = useMutation(api.tests.addTest);
@@ -277,4 +277,6 @@ export default function AddTestForm(props: AddTestFormProps) {
       </div>
     </form>
   );
-}
+};
+
+export default AddTestForm;
