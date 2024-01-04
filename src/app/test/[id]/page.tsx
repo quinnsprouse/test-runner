@@ -20,45 +20,6 @@ import { useQuery } from "convex/react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { api } from "../../../../convex/_generated/api";
 
-const invoice = {
-  subTotal: "$8,800.00",
-  tax: "$1,760.00",
-  total: "$10,560.00",
-  items: [
-    {
-      id: 1,
-      title: "Logo redesign",
-      description: "New logo and digital asset playbook.",
-      hours: "20.0",
-      rate: "$100.00",
-      price: "$2,000.00",
-    },
-    {
-      id: 2,
-      title: "Website redesign",
-      description: "Design and program new company website.",
-      hours: "52.0",
-      rate: "$100.00",
-      price: "$5,200.00",
-    },
-    {
-      id: 3,
-      title: "Business cards",
-      description: 'Design and production of 3.5" x 2.0" business cards.',
-      hours: "12.0",
-      rate: "$100.00",
-      price: "$1,200.00",
-    },
-    {
-      id: 4,
-      title: "T-shirt design",
-      description: "Three t-shirt design concepts.",
-      hours: "4.0",
-      rate: "$100.00",
-      price: "$400.00",
-    },
-  ],
-};
 const activity = [
   {
     id: 1,
@@ -90,7 +51,7 @@ const activity = [
         "https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     },
     comment:
-      "Called client, they reassured me the invoice would be paid by the 25th.",
+      "does't seem to be any issues with this. Maybe the problem was on the user's end?",
     date: "3d ago",
     dateTime: "2023-01-23T15:56",
   },
@@ -163,7 +124,6 @@ export default function TestDetailsPage({
 }: {
   params: { id: Id<"tests"> };
 }) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selected, setSelected] = useState(moods[5]);
   const testId = params.id;
   const test = useQuery(api.tests.getTestById, { testId });
@@ -269,40 +229,42 @@ export default function TestDetailsPage({
             <h2 className="sr-only">Test Summary</h2>
             <div className="rounded-lg bg-gray-50 shadow-sm ring-1 ring-gray-900/5">
               <dl className="flex flex-wrap">
+                {/* Created By Section */}
                 <div className="flex-auto pl-6 pt-6">
-                  <dt className="text-sm font-semibold leading-6 text-gray-900">
-                    Created By
-                  </dt>
-                  <div className="-m-1.5 flex items-center p-1.5">
-                    <span className="sr-only">Open user menu</span>
+                  <dt className="text-sm font-semibold text-gray-900 flex items-center">
+                    <span className="mr-4">Created By</span>
                     <img
-                      className="h-8 w-8 rounded-full bg-gray-50"
+                      className="h-6 w-6 rounded-full bg-gray-50"
                       src={test.createdByImageUrl}
                       alt=""
                     />
-                    <span className="hidden lg:flex lg:items-center">
+                    <span className="hidden lg:flex lg:items-center ml-4">
                       <span
-                        className="ml-4 text-sm font-semibold leading-6 text-gray-900"
+                        className="text-sm font-semibold text-gray-900"
                         aria-hidden="true"
                       >
                         {test.createdBy}
                       </span>
                     </span>
-                  </div>
+                  </dt>
                 </div>
-                <div className="flex-none self-end px-6 pt-4">
+
+                {/* Test Status Section */}
+                {/* <div className="flex-none self-end px-6 pt-4">
                   <dt className="sr-only">Test Status</dt>
                   <dd
                     className={`rounded-md px-2 py-1 text-xs font-medium ${
                       test.status === "pass"
-                        ? "bg-green-50 text-green-600"
-                        : "bg-red-50 text-red-600"
-                    } ring-1 ring-inset ring-green-600/20`}
+                        ? "bg-green-50 text-green-600 ring-1 ring-inset ring-green-600/20"
+                        : "bg-red-50 text-red-600 ring-1 ring-inset ring-red-600/20"
+                    }`}
                   >
                     {test.status.toUpperCase()}
                   </dd>
-                </div>
-                <div className="mt-6 flex w-full flex-none gap-x-4 border-t border-gray-900/5 px-6 pt-6">
+                </div> */}
+
+                {/* Creation Time Section */}
+                <div className="mt-6 mb-6 flex w-full flex-none gap-x-4 border-t border-gray-900/5 px-6 pt-6">
                   <dt className="flex-none">
                     <span className="sr-only">Created On</span>
                     <CalendarDaysIcon
@@ -310,9 +272,9 @@ export default function TestDetailsPage({
                       aria-hidden="true"
                     />
                   </dt>
-                  <dd className="text-sm font-medium leading-6 text-gray-900">
+                  <dd className="text-sm font-medium text-gray-900">
                     <time dateTime={new Date(test._creationTime).toISOString()}>
-                      {new Date(test._creationTime).toLocaleDateString()}
+                      {new Date(test._creationTime).toLocaleString()}
                     </time>
                   </dd>
                 </div>
@@ -431,7 +393,7 @@ export default function TestDetailsPage({
                         <span className="font-medium text-gray-900">
                           {activityItem.person.name}
                         </span>{" "}
-                        {activityItem.type} the invoice.
+                        {activityItem.type} the test.
                       </p>
                       <time
                         dateTime={activityItem.dateTime}

@@ -19,6 +19,7 @@ import type { UserResource } from "@clerk/types";
 import { useUser } from "@clerk/clerk-react";
 import { useClerk } from "@clerk/clerk-react";
 import { useRouter } from "next/navigation";
+import { useSearch } from "@/utilities/SearchContext";
 
 const navigation = [
   { name: "All Tests", href: "/", icon: HomeIcon, current: true },
@@ -38,7 +39,7 @@ export default function sidenavHeader({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchString, setSearchString] = useState(""); // State for the search string
+  const { searchString, setSearchString } = useSearch();
   const tests = searchString
     ? useQuery(api.tests.searchTests, { searchString: searchString }) // Pass an object with searchString
     : useQuery(api.tests.get);

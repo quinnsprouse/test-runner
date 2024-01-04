@@ -58,3 +58,23 @@ export const updateTestStatus = mutation({
     await ctx.db.patch(args.id, { status: args.status });
   },
 });
+
+export const editTestMutilation = mutation({
+  args: {
+    testId: v.id("tests"),
+    updatedFields: v.object({
+      actual: v.optional(v.string()),
+      desc: v.optional(v.string()),
+      developer: v.optional(v.array(v.string())),
+      expected: v.optional(v.string()),
+      notes: v.optional(v.string()),
+      status: v.optional(v.string()),
+      createdBy: v.optional(v.string()),
+      createdByImageUrl: v.optional(v.string()),
+    }),
+  },
+  handler: async (ctx, { testId, updatedFields }) => {
+    await ctx.db.patch(testId, updatedFields);
+    // Optionally return a value, e.g., the updated test
+  },
+});

@@ -3,10 +3,14 @@ import { Id } from "../../convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import Spinner from "./spinner";
 import { Menu, Transition } from "@headlessui/react";
-import { EllipsisVerticalIcon } from "@heroicons/react/20/solid";
+import {
+  CalendarDaysIcon,
+  EllipsisVerticalIcon,
+} from "@heroicons/react/20/solid";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import TestEmptyState from "./TestEmptyState";
+import { getStatusClassName } from "@/utilities/utils";
 
 type TestItem = {
   _id: Id<"tests">;
@@ -17,6 +21,8 @@ type TestItem = {
   expected: string;
   notes: string;
   status: string;
+  createdBy: string;
+  createdByImageUrl: string;
 };
 
 // Props for the TestTable component
@@ -32,8 +38,7 @@ const TestTable: React.FC<TestTableProps> = ({ tests }) => {
   const router = useRouter();
 
   const handleEdit = (id: string) => {
-    // logic to handle edit
-    console.log("Edit:", id);
+    router.push(`/edit/${id}`);
   };
 
   const handleDelete = async (id: string) => {
@@ -47,8 +52,7 @@ const TestTable: React.FC<TestTableProps> = ({ tests }) => {
     }
   };
 
-  const toggleStatus = async (id: Id<"tests">, currentStatus: string) => {
-    const newStatus = currentStatus === "pass" ? "fail" : "pass";
+  const toggleStatus = async (id: Id<"tests">, newStatus: string) => {
     try {
       await updateTestStatusMutation({ id, status: newStatus });
       // Optionally refresh local state or re-fetch tests to update UI
@@ -116,19 +120,16 @@ const TestTable: React.FC<TestTableProps> = ({ tests }) => {
                     Description
                   </th>
                   <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    Developer
-                  </th>
-                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    Expected
-                  </th>
-                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    Actual
+                    Created By
                   </th>
                   <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                     Status
                   </th>
                   <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    Notes
+                    Tags
+                  </th>
+                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    Created On
                   </th>
                 </tr>
               </thead>
@@ -145,28 +146,45 @@ const TestTable: React.FC<TestTableProps> = ({ tests }) => {
                       {item.desc}
                     </td>
                     <td className="px-3 py-5 text-sm text-gray-500">
-                      {item.developer.join(", ")}
+                      <dt className="text-sm font-semibold text-gray-900 flex items-center">
+                        <img
+                          className="h-6 w-6 rounded-full bg-gray-50"
+                          src={item.createdByImageUrl}
+                          alt=""
+                        />
+                        <span className="hidden lg:flex lg:items-center ml-4">
+                          <span
+                            className="text-sm font-semibold text-gray-900"
+                            aria-hidden="true"
+                          >
+                            {item.createdBy}
+                          </span>
+                        </span>
+                      </dt>
                     </td>
                     <td className="px-3 py-5 text-sm text-gray-500">
-                      {item.expected}
-                    </td>
-                    <td className="px-3 py-5 text-sm text-gray-500">
-                      {item.actual}
-                    </td>
-                    <td className="px-3 py-5 text-sm">
                       <span
-                        className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
-                          item.status === "fail"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-green-100 text-green-700"
-                        }`}
+                        className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${getStatusClassName(
+                          item.status
+                        )}`}
                       >
                         {item.status.charAt(0).toUpperCase() +
                           item.status.slice(1)}
                       </span>
                     </td>
-                    <td className="px-3 py-5 text-sm text-gray-500">
-                      {item.notes}
+                    <td className="px-3 py-5 text-sm text-gray-500">new tag</td>
+                    <td className="px-3 py-5 text-sm">
+                      <div className="flex">
+                        <dd className="text-sm font-medium text-gray-900">
+                          <time
+                            dateTime={new Date(
+                              item._creationTime
+                            ).toISOString()}
+                          >
+                            {new Date(item._creationTime).toLocaleString()}
+                          </time>
+                        </dd>
+                      </div>
                     </td>
                     <td className="text-sm text-gray-500">
                       <Menu
@@ -202,31 +220,71 @@ const TestTable: React.FC<TestTableProps> = ({ tests }) => {
                         >
                           <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
                             <div className="py-1">
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      toggleStatus(item._id, item.status);
-                                    }}
-                                    className={`${
-                                      active ? "bg-gray-100" : ""
-                                    } w-full px-4 py-2 text-sm leading-5 text-left`}
-                                  >
-                                    Change to{" "}
-                                    <span
-                                      className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
-                                        item.status === "pass"
-                                          ? "bg-red-100 text-red-700"
-                                          : "bg-green-100 text-green-700"
-                                      }`}
+                              {item.status !== "pass" && (
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleStatus(item._id, "pass");
+                                      }}
+                                      className={`${
+                                        active ? "bg-green-100" : ""
+                                      } w-full px-4 py-2 text-sm leading-5 text-left`}
                                     >
-                                      {item.status === "pass" ? "Fail" : "Pass"}
-                                    </span>
-                                  </button>
-                                )}
-                              </Menu.Item>
+                                      Change to{" "}
+                                      <span className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-green-100 text-green-700">
+                                        Pass
+                                      </span>
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                              )}
+
+                              {item.status !== "fail" && (
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleStatus(item._id, "fail");
+                                      }}
+                                      className={`${
+                                        active ? "bg-red-100" : ""
+                                      } w-full px-4 py-2 text-sm leading-5 text-left`}
+                                    >
+                                      Change to{" "}
+                                      <span className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-red-100 text-red-700">
+                                        Fail
+                                      </span>
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                              )}
+
+                              {item.status !== "pending" && (
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleStatus(item._id, "pending");
+                                      }}
+                                      className={`${
+                                        active ? "bg-yellow-100" : ""
+                                      } w-full px-4 py-2 text-sm leading-5 text-left`}
+                                    >
+                                      Change to{" "}
+                                      <span className="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700">
+                                        Pending
+                                      </span>
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                              )}
                               <Menu.Item>
                                 {({ active }) => (
                                   <a
